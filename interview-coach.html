@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Panel Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12151b; --panel:#1b1f27; --panel-2:#232833; --line:#333a47;
+    --text:#eef0f3; --muted:#9aa2b1; --gold:#c9a15a; --gold-dim:#8a7343;
+    --alert:#d1685b; --good:#7fae8e;
+    --serif:'Fraunces',Georgia,serif; --sans:'Work Sans',system-ui,sans-serif;
+  }
+  @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]){
+    --ink:#12151b; --panel:#1b1f27; --panel-2:#232833; --line:#333a47; --text:#eef0f3; --muted:#9aa2b1;
+  }}
+  :root[data-theme="light"]{ --ink:#12151b; --panel:#1b1f27; --panel-2:#232833; --line:#333a47; --text:#eef0f3; --muted:#9aa2b1; }
+  *{box-sizing:border-box;}
+  html{scroll-padding-top:env(safe-area-inset-top,0px);}
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+  body{
+    margin:0; min-height:100%; background:var(--ink); color:var(--text); font-family:var(--sans);
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    -webkit-font-smoothing:antialiased; position:relative; overflow-x:hidden;
+  }
+  body::before{
+    content:''; position:fixed; top:-20%; left:50%; width:900px; height:700px; margin-left:-450px;
+    background:radial-gradient(circle, rgba(201,161,90,.10) 0%, rgba(201,161,90,0) 68%);
+    pointer-events:none; z-index:0; animation:spotlight 14s ease-in-out infinite;
+  }
+  @keyframes spotlight{
+    0%,100%{ opacity:.7; transform:translateY(0) scale(1); }
+    50%{ opacity:1; transform:translateY(30px) scale(1.06); }
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:48px 24px 64px; position:relative; z-index:1;
+    animation:riseIn .5s cubic-bezier(.2,.7,.3,1) both;}
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  h1,h2,h3{font-family:var(--serif); font-weight:500; margin:0;}
+  .brand{display:flex; align-items:center; gap:10px; margin-bottom:44px;}
+  .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--gold); box-shadow:0 0 0 0 rgba(201,161,90,.5); animation:dotGlow 2.4s ease-in-out infinite;}
+  @keyframes dotGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(201,161,90,.35); } 50%{ box-shadow:0 0 0 6px rgba(201,161,90,0); } }
+  .brand span{font-family:var(--serif); font-size:19px; letter-spacing:.01em;}
+  .lede{color:var(--muted); font-size:15px; line-height:1.6; max-width:46ch;}
+  fieldset{border:0; padding:0; margin:28px 0 0;}
+  label{display:block; font-size:13px; color:var(--muted); margin-bottom:8px;}
+  input[type=text], select, textarea{
+    width:100%; background:var(--panel); border:1px solid var(--line); color:var(--text);
+    border-radius:6px; padding:12px 14px; font-family:var(--sans); font-size:15px; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  input[type=text]:focus, select:focus, textarea:focus{border-color:var(--gold); box-shadow:0 0 0 3px rgba(201,161,90,.14);}
+  textarea{resize:vertical; min-height:120px; line-height:1.5;}
+  .field{margin-bottom:18px;}
+  .row{display:flex; gap:14px;}
+  .row > .field{flex:1;}
+  button{
+    font-family:var(--sans); font-size:15px; font-weight:600; border-radius:6px; border:1px solid transparent;
+    padding:13px 22px; cursor:pointer; transition:background .15s,border-color .15s,transform .12s ease;
+  }
+  button:focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+  button:active{transform:scale(.97);}
+  .btn-primary{background:var(--gold); color:#1a1408;}
+  .btn-primary:hover{background:#d6ac66; transform:translateY(-1px);}
+  .btn-primary:disabled{background:var(--gold-dim); color:#3a3222; cursor:not-allowed; transform:none;}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--text);}
+  .btn-ghost:hover{border-color:var(--gold); color:var(--gold);}
+  .actions{margin-top:32px; display:flex; gap:12px;}
+
+  .stage{background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:34px 32px; position:relative;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.03), 0 20px 40px -24px rgba(0,0,0,.6);}
+  .stage::before{
+    content:''; position:absolute; top:-1px; left:24px; right:24px; height:2px;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent); border-radius:2px;
+  }
+  .corner{position:absolute; width:16px; height:16px; border-color:var(--gold-dim); opacity:.55; pointer-events:none;}
+  .corner.tl{top:10px; left:10px; border-top:1px solid; border-left:1px solid; border-radius:3px 0 0 0;}
+  .corner.tr{top:10px; right:10px; border-top:1px solid; border-right:1px solid; border-radius:0 3px 0 0;}
+  .corner.bl{bottom:10px; left:10px; border-bottom:1px solid; border-left:1px solid; border-radius:0 0 0 3px;}
+  .corner.br{bottom:10px; right:10px; border-bottom:1px solid; border-right:1px solid; border-radius:0 0 3px 0;}
+  .cam{
+    position:fixed; top:calc(18px + env(safe-area-inset-top,0px)); right:18px; width:88px; height:66px;
+    border-radius:8px; overflow:hidden; border:1px solid var(--line); background:#000; z-index:20;
+    box-shadow:0 4px 18px rgba(0,0,0,.4); animation:camIn .4s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes camIn{ from{ opacity:0; transform:translateY(-8px) scale(.9); } to{ opacity:1; transform:translateY(0) scale(1); } }
+  .cam video{width:100%; height:100%; object-fit:cover; display:block;}
+  .cam .rec{position:absolute; top:5px; left:6px; display:flex; align-items:center; gap:5px; font-size:10px; color:#fff; text-shadow:0 1px 2px #000;}
+  .cam .rec::before{content:''; width:6px; height:6px; border-radius:50%; background:var(--alert); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .qmeta{display:flex; justify-content:space-between; align-items:center; margin-bottom:22px;}
+  .qmeta .type-tag{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); border:1px solid var(--line); border-radius:20px; padding:4px 10px;}
+  .progress{display:flex; align-items:center; gap:6px;}
+  .progress .seg{width:20px; height:3px; border-radius:2px; background:var(--line); transition:background .3s;}
+  .progress .seg.done{background:var(--gold-dim);}
+  .progress .seg.active{background:var(--gold);}
+  .hero{display:flex; gap:18px; align-items:flex-start; margin-bottom:6px;}
+  .hero .rule{width:2px; align-self:stretch; background:linear-gradient(var(--gold), transparent); border-radius:2px; flex-shrink:0; margin-top:4px;}
+  .mark{display:flex; align-items:flex-end; gap:2px; height:16px;}
+  .mark span{width:3px; background:var(--gold); border-radius:1px; display:block;}
+  .qtext{font-family:var(--serif); font-size:22px; line-height:1.4; margin-bottom:6px;}
+  .speak-row{display:flex; align-items:center; gap:10px; margin:14px 0 26px;}
+  .speak-row button{padding:8px 14px; font-size:13px;}
+  .mic-row{display:flex; align-items:center; gap:12px; margin:18px 0 6px;}
+  .mic-btn{
+    width:52px; height:52px; border-radius:50%; background:var(--panel-2); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:transform .12s ease;
+  }
+  .mic-btn.on{background:var(--alert); border-color:var(--alert); animation:micRing 1.4s ease-out infinite;}
+  @keyframes micRing{
+    0%{ box-shadow:0 0 0 0 rgba(209,104,91,.5); }
+    100%{ box-shadow:0 0 0 14px rgba(209,104,91,0); }
+  }
+  .mic-btn svg{width:20px; height:20px; fill:var(--text);}
+  .mic-hint{font-size:13px; color:var(--muted);}
+
+  .warn-banner{
+    background:rgba(209,104,91,.12); border:1px solid rgba(209,104,91,.4); color:#e3a099;
+    border-radius:6px; padding:10px 14px; font-size:13px; margin-bottom:20px;
+    animation:slideDown .35s cubic-bezier(.2,.7,.3,1) both;
+  }
+  @keyframes slideDown{ from{ opacity:0; transform:translateY(-8px); } to{ opacity:1; transform:translateY(0); } }
+  .thinking{color:var(--muted); font-size:14px; display:flex; align-items:center; gap:10px;}
+  .dots{display:inline-flex; gap:4px;}
+  .dots span{width:5px; height:5px; border-radius:50%; background:var(--gold); animation:dotBounce 1.2s ease-in-out infinite;}
+  .dots span:nth-child(2){animation-delay:.15s;}
+  .dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes dotBounce{ 0%,60%,100%{ opacity:.3; transform:translateY(0); } 30%{ opacity:1; transform:translateY(-3px); } }
+
+  .stage{animation:riseIn .4s cubic-bezier(.2,.7,.3,1) both;}
+  .qtext{animation:riseIn .45s cubic-bezier(.2,.7,.3,1) both;}
+  .feedback{margin-top:22px; padding-top:22px; border-top:1px solid var(--line); animation:riseIn .4s cubic-bezier(.2,.7,.3,1) both;}
+  .feedback h4{font-family:var(--sans); font-size:12px; letter-spacing:.04em; color:var(--gold); margin-bottom:8px; text-transform:uppercase;}
+  .feedback p{font-size:14.5px; line-height:1.6; color:var(--text); margin:0;}
+
+  .summary-item{padding:18px 0; border-bottom:1px solid var(--line); animation:riseIn .45s cubic-bezier(.2,.7,.3,1) both;}
+  .summary-item:last-child{border-bottom:0;}
+  .summary-item .q{font-family:var(--serif); font-size:17px; margin-bottom:8px;}
+  .summary-item .a{font-size:14px; color:var(--muted); margin-bottom:8px; line-height:1.55;}
+  .summary-item .f{font-size:14px; color:var(--text); line-height:1.55;}
+  .score-badge{display:inline-block; background:var(--panel-2); border:1px solid var(--line); border-radius:20px; padding:5px 14px; font-size:13px; color:var(--gold); margin-bottom:20px; animation:riseIn .5s cubic-bezier(.2,.7,.3,1) both;}
+
+  .proctor-list{list-style:none; padding:0; margin:0; font-size:13px; color:var(--muted);}
+  .proctor-list li{padding:4px 0;}
+  .toggle{display:flex; align-items:center; gap:10px; margin-top:20px; font-size:13px; color:var(--muted);}
+  .toggle input{width:16px; height:16px;}
+  footer{margin-top:40px; font-size:12px; color:var(--muted); opacity:.7;}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+const state = {
+  screen: 'setup',
+  role: '', level: 'Mid-level', type: 'Behavioral',
+  proctorEnabled: true,
+  camStream: null,
+  violations: [],
+  qIndex: 0,
+  totalQ: 5,
+  questions: [],
+  answers: [],
+  feedbacks: [],
+  currentQuestion: '',
+  answerText: '',
+  loadingQ: false,
+  loadingFeedback: false,
+  listening: false,
+  finalSummary: ''
+};
+
+let sampleFn = null;
+let recognizer = null;
+
+function h(tag, attrs, children){
+  const el = document.createElement(tag);
+  for(const k in (attrs||{})){
+    if(k === 'html') el.innerHTML = attrs[k];
+    else if(k.startsWith('on')) el.addEventListener(k.slice(2), attrs[k]);
+    else el.setAttribute(k, attrs[k]);
+  }
+  (children||[]).forEach(c => { if(c) el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); });
+  return el;
+}
+
+async function initSample(){
+  try{
+    sampleFn = await claude.use('sample');
+  }catch(e){ sampleFn = null; }
+}
+
+async function askAI(prompt){
+  if(!sampleFn) return null;
+  try{
+    const res = await sampleFn(prompt, { modelTier: 'default' });
+    return res.text.trim();
+  }catch(e){ return null; }
+}
+
+function brandNode(){
+  return h('div', {class:'brand'}, [
+    h('div', {class:'mark'}, [
+      h('span', {style:'height:7px;'}), h('span', {style:'height:14px;'}), h('span', {style:'height:10px;'})
+    ]),
+    h('span', {}, ['The Panel Room'])
+  ]);
+}
+
+function progressDots(){
+  const p = h('div', {class:'progress'}, []);
+  for(let i=0;i<state.totalQ;i++){
+    let cls = 'seg';
+    if(i < state.qIndex) cls += ' done';
+    else if(i === state.qIndex) cls += ' active';
+    p.appendChild(h('span', {class:cls}));
+  }
+  return p;
+}
+
+function loader(label){
+  return h('div', {class:'thinking'}, [
+    label,
+    h('span', {class:'dots'}, [h('span'), h('span'), h('span')])
+  ]);
+}
+
+function speak(text){
+  try{
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.98; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+function setupRecognition(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR) return null;
+  const r = new SR();
+  r.continuous = true; r.interimResults = true; r.lang = 'en-US';
+  r.onresult = (ev) => {
+    let transcript = '';
+    for(let i=0;i<ev.results.length;i++) transcript += ev.results[i][0].transcript + ' ';
+    state.answerText = transcript.trim();
+    render();
+  };
+  r.onend = () => { if(state.listening){ state.listening = false; render(); } };
+  return r;
+}
+
+function toggleMic(){
+  if(!recognizer){ recognizer = setupRecognition(); }
+  if(!recognizer) return;
+  if(state.listening){
+    recognizer.stop(); state.listening = false;
+  } else {
+    try{ recognizer.start(); state.listening = true; }catch(e){}
+  }
+  render();
+}
+
+async function startProctoring(){
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    state.camStream = stream;
+  }catch(e){
+    state.violations.push('Camera access was not granted — proctoring runs without video.');
+  }
+  document.addEventListener('visibilitychange', () => {
+    if(document.hidden && state.screen === 'interview'){
+      state.violations.push('Tab left focus at ' + new Date().toLocaleTimeString());
+      render();
+    }
+  });
+  window.addEventListener('blur', () => {
+    if(state.screen === 'interview' && document.visibilityState === 'visible'){
+      state.violations.push('Window lost focus at ' + new Date().toLocaleTimeString());
+      render();
+    }
+  });
+}
+
+async function beginInterview(){
+  state.screen = 'interview';
+  render();
+  await startProctoring();
+  await nextQuestion();
+}
+
+async function nextQuestion(){
+  state.loadingQ = true; state.answerText = ''; render();
+  const history = state.questions.map((q,i) => `Q: ${q}\nA: ${state.answers[i]||''}`).join('\n\n');
+  const prompt = `You are a senior interview coach conducting a live ${state.type} interview for a ${state.level} ${state.role} candidate. ${history ? 'Prior exchange:\n'+history+'\n\n' : ''}Ask exactly ONE natural, specific interview question appropriate for this stage of the conversation. Return ONLY the question text, no numbering, no preamble.`;
+  const q = await askAI(prompt);
+  state.currentQuestion = q || `Tell me about a challenging project you handled as a ${state.role}.`;
+  state.questions.push(state.currentQuestion);
+  state.loadingQ = false;
+  render();
+  speak(state.currentQuestion);
+}
+
+async function submitAnswer(){
+  if(state.listening && recognizer) recognizer.stop();
+  const answer = state.answerText.trim() || '(No answer given)';
+  state.answers.push(answer);
+  state.loadingFeedback = true; render();
+  const prompt = `You are an interview coach. The candidate (${state.level} ${state.role}) was asked: "${state.currentQuestion}"\nThey answered: "${answer}"\nGive concise, encouraging but honest feedback in 2-3 sentences: what worked, and one concrete way to improve. No headers, no lists.`;
+  const fb = await askAI(prompt);
+  state.feedbacks.push(fb || 'Good effort — keep your answers specific with a clear example and a measurable outcome.');
+  state.loadingFeedback = false;
+  state.qIndex++;
+  render();
+}
+
+async function proceed(){
+  if(state.qIndex >= state.totalQ){
+    await finishInterview();
+  } else {
+    await nextQuestion();
+  }
+}
+
+async function finishInterview(){
+  state.screen = 'loadingSummary'; render();
+  if(state.camStream){ state.camStream.getTracks().forEach(t=>t.stop()); }
+  const transcript = state.questions.map((q,i)=>`Q${i+1}: ${q}\nA${i+1}: ${state.answers[i]}`).join('\n\n');
+  const prompt = `You are an interview coach wrapping up a mock ${state.type} interview for a ${state.level} ${state.role} candidate. Here is the full transcript:\n\n${transcript}\n\nWrite a short closing assessment (4-5 sentences): overall impression, the strongest moment, the single biggest area to improve, and one encouraging closing line. No headers, no lists, plain prose.`;
+  state.finalSummary = await askAI(prompt) || 'You engaged thoughtfully with every question. Focus next on grounding answers in specific, measurable examples — that alone will sharpen your impact.';
+  state.screen = 'summary';
+  render();
+}
+
+function screenSetup(){
+  const box = h('div', {class:'wrap'}, [
+    brandNode(),
+    h('div', {class:'hero'}, [
+      h('div', {class:'rule'}),
+      h('div', {}, [
+        h('h1', {}, ['Practice the interview before it counts.']),
+        h('p', {class:'lede', style:'margin-top:14px;'}, ['An AI panelist asks live questions, reads them aloud, watches for focus, and gives you real feedback after each answer.'])
+      ])
+    ]),
+    (()=>{
+      const fs = h('fieldset', {}, []);
+      const roleField = h('div', {class:'field'}, [
+        h('label', {}, ['Role you\'re interviewing for']),
+        h('input', {type:'text', id:'roleInput', placeholder:'e.g. Product Marketing Manager', value: state.role})
+      ]);
+      const row = h('div', {class:'row'}, [
+        h('div', {class:'field'}, [
+          h('label', {}, ['Experience level']),
+          (()=>{ const sel = h('select', {id:'levelInput'}, []);
+            ['Entry-level','Mid-level','Senior','Executive'].forEach(l=>{
+              const opt = h('option', {value:l}, [l]); if(l===state.level) opt.setAttribute('selected','');
+              sel.appendChild(opt);
+            }); return sel; })()
+        ]),
+        h('div', {class:'field'}, [
+          h('label', {}, ['Interview type']),
+          (()=>{ const sel = h('select', {id:'typeInput'}, []);
+            ['Behavioral','Technical','Case study','Leadership'].forEach(l=>{
+              const opt = h('option', {value:l}, [l]); if(l===state.type) opt.setAttribute('selected','');
+              sel.appendChild(opt);
+            }); return sel; })()
+        ])
+      ]);
+      const toggle = h('label', {class:'toggle'}, [
+        h('input', {type:'checkbox', id:'proctorToggle', checked: state.proctorEnabled ? 'checked' : null}),
+        h('span', {}, ['Enable AI proctoring (camera + tab-focus monitoring)'])
+      ]);
+      fs.appendChild(roleField); fs.appendChild(row); fs.appendChild(toggle);
+      return fs;
+    })(),
+    h('div', {class:'actions'}, [
+      h('button', {class:'btn-primary', onclick: () => {
+        state.role = document.getElementById('roleInput').value.trim() || 'Software Engineer';
+        state.level = document.getElementById('levelInput').value;
+        state.type = document.getElementById('typeInput').value;
+        state.proctorEnabled = document.getElementById('proctorToggle').checked;
+        beginInterview();
+      }}, ['Begin the interview'])
+    ]),
+    h('footer', {}, ['5 questions · spoken aloud · answers reviewed by AI as you go'])
+  ]);
+  return box;
+}
+
+function screenInterview(){
+  const nodes = [];
+  if(state.camStream && state.proctorEnabled){
+    const camBox = h('div', {class:'cam'}, [h('div',{class:'rec'},['LIVE']), h('video',{autoplay:'', muted:'', playsinline:''})]);
+    nodes.push(camBox);
+    requestAnimationFrame(()=>{ const v = camBox.querySelector('video'); if(v) v.srcObject = state.camStream; });
+  }
+  const wrap = h('div', {class:'wrap'}, []);
+  wrap.appendChild(brandNode());
+
+  if(state.violations.length){
+    const w = h('div', {class:'warn-banner show'}, [
+      `${state.violations.length} proctoring flag${state.violations.length>1?'s':''} — ` + state.violations[state.violations.length-1]
+    ]);
+    wrap.appendChild(w);
+  }
+
+  const stage = h('div', {class:'stage'}, [
+    h('span', {class:'corner tl'}), h('span', {class:'corner tr'}),
+    h('span', {class:'corner bl'}), h('span', {class:'corner br'})
+  ]);
+  stage.appendChild(h('div', {class:'qmeta'}, [
+    progressDots(),
+    h('span', {class:'type-tag'}, [state.type])
+  ]));
+
+  if(state.loadingQ){
+    stage.appendChild(loader('The panel is preparing the next question'));
+  } else {
+    stage.appendChild(h('h3', {class:'qtext'}, [state.currentQuestion]));
+    stage.appendChild(h('div', {class:'speak-row'}, [
+      h('button', {class:'btn-ghost', onclick: ()=>speak(state.currentQuestion)}, ['🔊 Replay question'])
+    ]));
+
+    const ta = h('textarea', {placeholder:'Type your answer, or use the mic below…'}, []);
+    ta.value = state.answerText;
+    ta.addEventListener('input', (e)=>{ state.answerText = e.target.value; });
+    stage.appendChild(ta);
+
+    const micRow = h('div', {class:'mic-row'}, [
+      h('button', {class:'mic-btn' + (state.listening?' on':''), onclick: toggleMic, title:'Answer by voice'}, [
+        (()=>{ const svg = document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.setAttribute('viewBox','0 0 24 24');
+          svg.innerHTML = '<path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/>'; return svg; })()
+      ]),
+      h('span', {class:'mic-hint'}, [state.listening ? 'Listening… tap to stop' : 'Tap the mic to answer aloud'])
+    ]);
+    stage.appendChild(micRow);
+
+    if(state.loadingFeedback){
+      stage.appendChild(h('div', {class:'feedback'}, [loader('Reviewing your answer')]));
+    } else if(state.feedbacks.length === state.qIndex && state.qIndex > 0 && state.feedbacks[state.qIndex-1]){
+      stage.appendChild(h('div', {class:'feedback'}, [
+        h('h4', {}, ['Coach feedback']),
+        h('p', {}, [state.feedbacks[state.qIndex-1]])
+      ]));
+    }
+
+    const actions = h('div', {class:'actions'}, []);
+    if(state.feedbacks.length === state.qIndex && !state.loadingFeedback){
+      actions.appendChild(h('button', {class:'btn-primary', onclick: submitAnswer, disabled: state.answerText.trim() ? null : 'disabled'}, ['Submit answer']));
+    } else if(!state.loadingFeedback) {
+      actions.appendChild(h('button', {class:'btn-primary', onclick: proceed}, [state.qIndex >= state.totalQ ? 'See summary' : 'Next question']));
+    }
+    stage.appendChild(actions);
+  }
+
+  wrap.appendChild(stage);
+  nodes.push(wrap);
+  const frag = document.createDocumentFragment();
+  nodes.forEach(n=>frag.appendChild(n));
+  return frag;
+}
+
+function screenLoadingSummary(){
+  return h('div', {class:'wrap'}, [
+    brandNode(),
+    loader('Preparing your closing assessment')
+  ]);
+}
+
+function screenSummary(){
+  const wrap = h('div', {class:'wrap'}, []);
+  wrap.appendChild(brandNode());
+  wrap.appendChild(h('h1', {}, ['Session complete']));
+  wrap.appendChild(h('span', {class:'score-badge'}, [`${state.role} · ${state.level} · ${state.type}`]));
+  wrap.appendChild(h('p', {class:'lede'}, [state.finalSummary]));
+
+  const list = h('div', {}, []);
+  state.questions.forEach((q,i)=>{
+    const item = h('div', {class:'summary-item', style:`animation-delay:${i*70}ms`}, [
+      h('div', {class:'q'}, [q]),
+      h('div', {class:'a'}, ['You said: ' + (state.answers[i]||'')]),
+      h('div', {class:'f'}, [state.feedbacks[i]||''])
+    ]);
+    list.appendChild(item);
+  });
+  wrap.appendChild(list);
+
+  if(state.violations.length){
+    const pw = h('div', {style:'margin-top:28px;'}, [
+      h('h4', {style:'font-size:12px;letter-spacing:.04em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;'}, ['Proctoring log']),
+      (()=>{ const ul = h('ul', {class:'proctor-list'}, []); state.violations.forEach(v=>ul.appendChild(h('li',{},[v]))); return ul; })()
+    ]);
+    wrap.appendChild(pw);
+  }
+
+  wrap.appendChild(h('div', {class:'actions'}, [
+    h('button', {class:'btn-ghost', onclick: ()=>{ location.reload(); }}, ['Start a new session'])
+  ]));
+  return wrap;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  app.innerHTML = '';
+  let node;
+  if(state.screen === 'setup') node = screenSetup();
+  else if(state.screen === 'interview') node = screenInterview();
+  else if(state.screen === 'loadingSummary') node = screenLoadingSummary();
+  else if(state.screen === 'summary') node = screenSummary();
+  app.appendChild(node);
+}
+
+initSample().then(render);
+render();
+</script>
+</body>
+</html>
